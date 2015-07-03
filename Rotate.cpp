@@ -84,8 +84,8 @@ bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degr
 // 双二次近似
 static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
 {
-	int	iX, iY;
 	Uint8	*pPixel = scanLine(dst, y, x);
+	int	iX, iY;
 	iX = (int)floor(X);
 	iY = (int)floor(Y);
 	if (0 <= iX && iX < src->w - 1 && 0 <= iY && iY < src->h - 1)
@@ -245,5 +245,21 @@ static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst
 #else
 static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
 {
+	Uint8	*pPixel = scanLine(dst, y, x);
+	int	iX, iY;
+	iX = (int)floor(X);
+	iY = (int)floor(Y);
+	if (0 <= iX && iX < src->w - 1 && 0 <= iY && iY < src->h - 1)
+	{
+		float	r, g, b, fX, fY;
+		Uint8	*pPixel0, *pPixel1;
+
+		pPixel0 = scanLine(src, iY, iX);
+		pPixel1 = scanLine(src, iY + 1, iX);
+		fX = X - iX;
+		fY = Y - iY;
+	} else {
+		pPixel[0] = pPixel[1] = pPixel[2] = 0;
+	}
 }
 #endif
