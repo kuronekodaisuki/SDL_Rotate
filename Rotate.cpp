@@ -112,6 +112,7 @@ static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int
 #ifdef _MSC_VER
 static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
 {
+	Uint8	*pPixel = scanLine(dst, y, x);
 	__m128i iXY;
 	__m128 XY; //= _mm_set_ps(X, X, Y, Y);
 	XY.m128_f32[0] = XY.m128_f32[1] = Y;
@@ -128,35 +129,35 @@ static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst
 
 	if (0 <= iX && iX < src->w - 1 && 0 <= iY && iY < src->h - 1)
 	{
-		Uint8	*pPixel0, *pPixel1, *pPixel;
+		Uint8	*pPixel0, *pPixel1;
 		Uint32	r, g, b;
 		__m64	fX;
 		__m128i	blue, green, red; // _mm_set_epiで代入すると、レジスタに割り当てられる
 		__m128	one;// = _mm_set_ps(1.0f, 1.0f, 1.0f, 1.0f);
 
-		pPixel = scanLine(dst, y);
-		pPixel0 = scanLine(src, iY);
-		pPixel1 = scanLine(src, iY + 1);
+		//pPixel = scanLine(dst, y);
+		pPixel0 = scanLine(src, iY, iX);
+		pPixel1 = scanLine(src, iY + 1, iX);
 
 		// Blue
-		blue.m128i_i32[2] = pPixel0[(iX + 1) * 3];
-		blue.m128i_i32[3] = pPixel0[(iX) * 3];
-		blue.m128i_i32[0] = pPixel1[(iX + 1) * 3];
-		blue.m128i_i32[1] = pPixel1[(iX) * 3];
+		blue.m128i_i32[2] = pPixel0[3];
+		blue.m128i_i32[3] = pPixel0[0];
+		blue.m128i_i32[0] = pPixel1[3];
+		blue.m128i_i32[1] = pPixel1[0];
 		// Green
 		//pPixel0 += 3;
 		//pPixel1 += 3;
-		green.m128i_i32[2] = pPixel0[(iX + 1) * 3 + 1];
-		green.m128i_i32[3] = pPixel0[(iX) * 3 + 1];
-		green.m128i_i32[0] = pPixel1[(iX + 1) * 3 + 1];
-		green.m128i_i32[1] = pPixel1[(iX) * 3 + 1];
+		green.m128i_i32[2] = pPixel0[4];
+		green.m128i_i32[3] = pPixel0[1];
+		green.m128i_i32[0] = pPixel1[4];
+		green.m128i_i32[1] = pPixel1[1];
 		// Red
 		//pPixel0 += 3;
 		//pPixel1 += 3;
-		red.m128i_i32[2] = pPixel0[(iX + 1) * 3 + 2];
-		red.m128i_i32[3] = pPixel0[(iX) * 3 + 2];
-		red.m128i_i32[0] = pPixel1[(iX + 1) * 3 + 2];
-		red.m128i_i32[1] = pPixel1[(iX) * 3 + 2];
+		red.m128i_i32[2] = pPixel0[5];
+		red.m128i_i32[3] = pPixel0[2];
+		red.m128i_i32[0] = pPixel1[5];
+		red.m128i_i32[1] = pPixel1[2];
 		// One
 		one.m128_f32[0] = one.m128_f32[1] = one.m128_f32[2] = one.m128_f32[3] = 1.0f;
 		// xmm0 = fX, fY
@@ -239,9 +240,11 @@ static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst
 			cvtss2si	eax, xmm0
 			mov			r, eax
 		}
-		pPixel[x * 3] = b;
-		pPixel[x * 3 + 1] = g;
-		pPixel[x * 3 + 2] = r;
+		pPixel[0] = b;
+		pPixel[1] = g;
+		pPixel[2] = r;
+	} else {
+		pPixel[0] = pPixel[1] = pPixel[2] = 0;
 	}
 }
 #else
