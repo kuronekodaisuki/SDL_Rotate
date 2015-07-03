@@ -135,7 +135,6 @@ static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst
 		__m128i	blue, green, red; // _mm_set_epiで代入すると、レジスタに割り当てられる
 		__m128	one;// = _mm_set_ps(1.0f, 1.0f, 1.0f, 1.0f);
 
-		//pPixel = scanLine(dst, y);
 		pPixel0 = scanLine(src, iY, iX);
 		pPixel1 = scanLine(src, iY + 1, iX);
 
@@ -145,15 +144,11 @@ static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst
 		blue.m128i_i32[0] = pPixel1[3];
 		blue.m128i_i32[1] = pPixel1[0];
 		// Green
-		//pPixel0 += 3;
-		//pPixel1 += 3;
 		green.m128i_i32[2] = pPixel0[4];
 		green.m128i_i32[3] = pPixel0[1];
 		green.m128i_i32[0] = pPixel1[4];
 		green.m128i_i32[1] = pPixel1[1];
 		// Red
-		//pPixel0 += 3;
-		//pPixel1 += 3;
 		red.m128i_i32[2] = pPixel0[5];
 		red.m128i_i32[3] = pPixel0[2];
 		red.m128i_i32[0] = pPixel1[5];
