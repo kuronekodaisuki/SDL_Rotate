@@ -22,6 +22,10 @@ inline Uint8 *scanLine(SDL_Surface *surface, int y)
 	return (Uint8 *)(surface->pixels) + (y * surface->pitch);
 }
 
+inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
+{
+	return (Uint8 *)(surface->pixels) + (y * surface->pitch) + (surface->format->BytesPerPixel * x);
+}
 
 bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degree, SDL_Rect *bound)
 {
@@ -81,7 +85,7 @@ bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degr
 static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
 {
 	int	iX, iY;
-	Uint8	*pPixel = scanLine(dst, y);
+	Uint8	*pPixel = scanLine(dst, y, x);
 	iX = (int)floor(X);
 	iY = (int)floor(Y);
 	if (0 <= iX && iX < src->w - 1 && 0 <= iY && iY < src->h - 1)
@@ -89,22 +93,18 @@ static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int
 		float	r, g, b, fX, fY;
 		Uint8	*pPixel0, *pPixel1;
 
-		pPixel0 = scanLine(src, iY);
-		pPixel1 = scanLine(src, iY + 1);
+		pPixel0 = scanLine(src, iY, iX);
+		pPixel1 = scanLine(src, iY + 1, iX);
 		fX = X - iX;
 		fY = Y - iY;
-		b = (pPixel0[iX * 3] * (1 - fX) + pPixel0[(iX + 1) * 3] * fX) * (1 - fY) + (pPixel1[iX * 3] * (1 - fX) + pPixel1[(iX + 1) * 3] * fX) * fY;
-		pPixel0 += 3;
-		pPixel1 += 3;
-		g = (pPixel0[iX * 3] * (1 - fX) + pPixel0[(iX + 1) * 3] * fX) * (1 - fY) + (pPixel1[iX * 3] * (1 - fX) + pPixel1[(iX + 1) * 3] * fX) * fY;
-		pPixel0 += 3;
-		pPixel1 += 3;
-		r = (pPixel0[iX * 3] * (1 - fX) + pPixel0[(iX + 1) * 3] * fX) * (1 - fY) + (pPixel1[iX * 3] * (1 - fX) + pPixel1[(iX + 1) * 3] * fX) * fY;
-		pPixel[x * 3] = (Uint8)b;
-		pPixel[x * 3 + 1] = (Uint8)g;
-		pPixel[x * 3 + 2] = (Uint8)r;
+		b = (pPixel0[0] * (1 - fX) + pPixel0[3] * fX) * (1 - fY) + (pPixel1[0] * (1 - fX) + pPixel1[3] * fX) * fY;
+		g = (pPixel0[1] * (1 - fX) + pPixel0[4] * fX) * (1 - fY) + (pPixel1[1] * (1 - fX) + pPixel1[4] * fX) * fY;
+		r = (pPixel0[2] * (1 - fX) + pPixel0[5] * fX) * (1 - fY) + (pPixel1[2] * (1 - fX) + pPixel1[5] * fX) * fY;
+		pPixel[0] = (Uint8)b;
+		pPixel[1] = (Uint8)g;
+		pPixel[2] = (Uint8)r;
 	} else {
-		pPixel[x * 3] = pPixel[x * 3 + 1] = pPixel[x * 3 + 2] = 0;
+		pPixel[0] = pPixel[1] = pPixel[2] = 0;
 	}
 }
 
