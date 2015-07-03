@@ -13,9 +13,9 @@
 #define __ASM__	__asm__ __volatile__
 #endif
 
-#define BILINEAR_24	BiLinear24
+#define BILINEAR_24	BiLinear24_SSE
 void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
-void biLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
+void BiLinear24_SSE(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
 
 inline Uint8 *scanLine(SDL_Surface *surface, int y)
 {
@@ -109,7 +109,7 @@ static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int
 }
 
 // 双二次近似
-static void biLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
+static void BiLinear24_SSE(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
 {
 	__m128i iXY;
 	__m128 XY; //= _mm_set_ps(X, X, Y, Y);
@@ -143,19 +143,19 @@ static void biLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int
 		blue.m128i_i32[0] = pPixel1[(iX + 1) * 3];
 		blue.m128i_i32[1] = pPixel1[(iX) * 3];
 		// Green
-		pPixel0 += 3;
-		pPixel1 += 3;
-		green.m128i_i32[2] = pPixel0[(iX + 1) * 3];
-		green.m128i_i32[3] = pPixel0[(iX) * 3];
-		green.m128i_i32[0] = pPixel1[(iX + 1) * 3];
-		green.m128i_i32[1] = pPixel1[(iX) * 3];
+		//pPixel0 += 3;
+		//pPixel1 += 3;
+		green.m128i_i32[2] = pPixel0[(iX + 1) * 3 + 1];
+		green.m128i_i32[3] = pPixel0[(iX) * 3 + 1];
+		green.m128i_i32[0] = pPixel1[(iX + 1) * 3 + 1];
+		green.m128i_i32[1] = pPixel1[(iX) * 3 + 1];
 		// Red
-		pPixel0 += 3;
-		pPixel1 += 3;
-		red.m128i_i32[2] = pPixel0[(iX + 1) * 3];
-		red.m128i_i32[3] = pPixel0[(iX) * 3];
-		red.m128i_i32[0] = pPixel1[(iX + 1) * 3];
-		red.m128i_i32[1] = pPixel1[(iX) * 3];
+		//pPixel0 += 3;
+		//pPixel1 += 3;
+		red.m128i_i32[2] = pPixel0[(iX + 1) * 3 + 2];
+		red.m128i_i32[3] = pPixel0[(iX) * 3 + 2];
+		red.m128i_i32[0] = pPixel1[(iX + 1) * 3 + 2];
+		red.m128i_i32[1] = pPixel1[(iX) * 3 + 2];
 		// One
 		one.m128_f32[0] = one.m128_f32[1] = one.m128_f32[2] = one.m128_f32[3] = 1.0f;
 		// xmm0 = fX, fY
