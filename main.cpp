@@ -10,7 +10,7 @@ bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degr
 int main(int argc, char** argv)
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
-	char *filename = "neko.bmp";
+	const char *filename = "neko.bmp";
 	SDL_Surface *src = SDL_LoadBMP(filename);
 	SDL_Surface *screen = SDL_SetVideoMode(src->w, src->h, 24, SDL_HWSURFACE | SDL_DOUBLEBUF);
 	if (src != NULL) {

@@ -29,7 +29,7 @@ inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
 
 bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degree, SDL_Rect *bound)
 {
-	int x, y, bitsPerPixel = src->format->BitsPerPixel;
+	int bitsPerPixel = src->format->BitsPerPixel;
 	double radian = M_PI / 180 * degree;
 	float c = (float)cos(radian);
 	float s = (float)sin(radian);
@@ -62,11 +62,11 @@ bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degr
 		break;
 
 	case 24:
-		for (y = bound->y; y < bound->h + bound->y; y++)
+		for (int y = bound->y; y < bound->h + bound->y; y++)
 		{
 			float Xx = X;
 			float Yx = Y;
-			for (x = bound->x; x < bound->w + bound->x; x++)
+			for (int x = bound->x; x < bound->w + bound->x; x++)
 			{
 				BILINEAR_24(src, Xx, Yx, dst, x, y);
 				Xx += c;
