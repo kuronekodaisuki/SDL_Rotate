@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 	SDL_Init(SDL_INIT_EVERYTHING);
 	char *filename = "neko.bmp";
 	SDL_Surface *src = SDL_LoadBMP(filename);
-	SDL_Surface *screen = SDL_SetVideoMode(1024, 768, 24, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	SDL_Surface *screen = SDL_SetVideoMode(src->w, src->h, 24, SDL_HWSURFACE | SDL_DOUBLEBUF);
 	if (src != NULL) {
 		SDL_Rect srcRect = {0, 0, src->w, src->h};
 		SDL_Rect dstRect = {0, 0};
