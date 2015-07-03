@@ -1,8 +1,8 @@
 ﻿// Rotate.cpp : コンソール アプリケーションのエントリ ポイントを定義します。
 //
 
-#include <SDL.h>
-#include <emmintrin.h>
+#include <SDL/SDL.h>
+//#include <emmintrin.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -13,9 +13,9 @@
 #define __ASM__	__asm__ __volatile__
 #endif
 
-#define BILINEAR_24	BiLinear24_SIMD
-void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
-void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
+#define BILINEAR_24	BiLinear24
+static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
+static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
 
 inline Uint8 *scanLine(SDL_Surface *surface, int y)
 {

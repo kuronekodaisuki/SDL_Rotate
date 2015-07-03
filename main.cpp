@@ -1,13 +1,13 @@
 //#include "stdafx.h"
 #include <stdio.h>
-#include <SDL.h>
+#include <SDL/SDL.h>
 
 #pragma comment(lib, "SDL.lib")
 
 
 bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degree, SDL_Rect *bound);
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	char *filename = "neko.bmp";
