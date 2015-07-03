@@ -13,9 +13,9 @@
 #define __ASM__	__asm__ __volatile__
 #endif
 
-#define BILINEAR_24	BiLinear24_SSE
+#define BILINEAR_24	BiLinear24_SIMD
 void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
-void BiLinear24_SSE(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
+void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
 
 inline Uint8 *scanLine(SDL_Surface *surface, int y)
 {
@@ -109,7 +109,8 @@ static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int
 }
 
 // 双二次近似
-static void BiLinear24_SSE(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
+#ifdef _MSC_VER
+static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
 {
 	__m128i iXY;
 	__m128 XY; //= _mm_set_ps(X, X, Y, Y);
@@ -243,3 +244,8 @@ static void BiLinear24_SSE(SDL_Surface *src, float X, float Y, SDL_Surface *dst,
 		pPixel[x * 3 + 2] = r;
 	}
 }
+#else
+static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
+{
+}
+#endif
