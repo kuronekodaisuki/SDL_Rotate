@@ -14,19 +14,46 @@
 #define __ASM__	__asm__ __volatile__
 #endif
 
-#define BILINEAR_24	BiLinear24
-static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
-static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
-
 inline Uint8 *scanLine(SDL_Surface *surface, int y)
 {
-	return (Uint8 *)(surface->pixels) + (y * surface->pitch);
+        return (Uint8 *)(surface->pixels) + (y * surface->pitch);
 }
 
 inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
 {
-	return (Uint8 *)(surface->pixels) + (y * surface->pitch) + (surface->format->BytesPerPixel * x);
+        return (Uint8 *)(surface->pixels) + (y * surface->pitch) + (surface->format->BytesPerPixel * x);
 }
+
+#define BILINEAR_24	BiLinear24
+static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
+static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
+static void Nearest24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
+{
+	int iX, iY;
+	iX = (int)floor(X);
+	iY = (int)floor(Y);
+        Uint8 *pDst = scanLine(dst, y, x);
+
+	if (0 <= iX && iX < src->w - 1 && 0 <= iY && iY < src->h - 1)
+        {
+		Uint8 *pSrc = scanLine(src, iY, iX);
+		pDst[0] = pSrc[0];
+		pDst[1] = pSrc[1];
+		pDst[2] = pSrc[2];
+	} else {
+		pDst[0] = pDst[1] = pDst[2] = 0;
+	}
+}
+
+//inline Uint8 *scanLine(SDL_Surface *surface, int y)
+//{
+//	return (Uint8 *)(surface->pixels) + (y * surface->pitch);
+//}
+
+//inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
+//{
+//	return (Uint8 *)(surface->pixels) + (y * surface->pitch) + (surface->format->BytesPerPixel * x);
+//}
 
 bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degree, SDL_Rect *bound)
 {
@@ -255,8 +282,11 @@ static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst
 		float	r, g, b, fX, fY;
 		Uint8	*pPixel0, *pPixel1;
 		float32x4_t XY;
+		uint8x8x3_t raster0, raster1;
 		pPixel0 = scanLine(src, iY, iX);
 		pPixel1 = scanLine(src, iY + 1, iX);
+		raster0 = vld3_u8(pPixel0);
+		raster1 = vld3_u8(pPixel1);
 		fX = X - iX;
 		fY = Y - iY;
 	} else {
