@@ -10,6 +10,7 @@
 #ifdef	_MSC_VER
 #define __ASM__	_asm
 #else
+#include <arm_neon.h>
 #define __ASM__	__asm__ __volatile__
 #endif
 
@@ -253,7 +254,7 @@ static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst
 	{
 		float	r, g, b, fX, fY;
 		Uint8	*pPixel0, *pPixel1;
-
+		float32x4_t XY;
 		pPixel0 = scanLine(src, iY, iX);
 		pPixel1 = scanLine(src, iY + 1, iX);
 		fX = X - iX;
