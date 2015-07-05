@@ -1,16 +1,16 @@
 //#include "stdafx.h"
 #include <stdio.h>
-#include <time.h>
+#include <sys/time.h>
 #include <SDL/SDL.h>
 
 #pragma comment(lib, "SDL.lib")
 
 // tick in microsec
 uint64_t getTick() {
-    struct timespec ts;
+    struct timeval ts;
     uint64_t theTick = 0U;
-    clock_gettime( CLOCK_REALTIME, &ts );
-    theTick  = ts.tv_nsec / 1000;
+    gettimeofday(&ts, NULL);	//clock_gettime( CLOCK_REALTIME, &ts );
+    theTick  = ts.tv_usec;
     theTick += ts.tv_sec * 1000000;
     return theTick;
 }
