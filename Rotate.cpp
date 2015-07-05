@@ -24,7 +24,7 @@ inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
         return (Uint8 *)(surface->pixels) + (y * surface->pitch) + (surface->format->BytesPerPixel * x);
 }
 
-#define BILINEAR_24	BiLinear24
+#define BILINEAR_24	Nearest24	//BiLinear24
 static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
 static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
 static void Nearest24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)

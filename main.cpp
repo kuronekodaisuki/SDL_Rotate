@@ -9,10 +9,16 @@
 uint64_t getTick() {
     struct timeval ts;
     uint64_t theTick = 0U;
-    gettimeofday(&ts, NULL);	//clock_gettime( CLOCK_REALTIME, &ts );
-    theTick  = ts.tv_usec;
-    theTick += ts.tv_sec * 1000000;
-    return theTick;
+    if (0 == gettimeofday(&ts, NULL))	//;	//clock_gettime( CLOCK_REALTIME, &ts );
+    {
+	theTick  = ts.tv_usec;
+    	theTick += ts.tv_sec * 1000000;
+    	printf("%d sec %d microsec ", ts.tv_sec, ts.tv_usec);
+	return theTick;
+    } else {
+	printf("error");
+	return 0;
+	}
 }
 
 bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degree, SDL_Rect *bound);
@@ -49,6 +55,7 @@ int main(int argc, char** argv)
 	//		SDL_Flip(screen);
 		}
 		uint64_t end = getTick();
+		printf("%d", start / 1000);
 		printf("%ld micro sec\n", end- start);
 		SDL_FreeSurface(src);
 	}
