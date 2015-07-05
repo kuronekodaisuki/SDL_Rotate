@@ -25,9 +25,9 @@ inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
 }
 
 #define BILINEAR_24	Nearest24	//BiLinear24
-static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
-static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
-static void Nearest24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
+inline void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
+inline void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
+inline void Nearest24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
 {
 	int iX, iY;
 	iX = (int)floor(X);
@@ -101,7 +101,7 @@ bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degr
 }
 
 // 双二次近似
-static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
+void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
 {
 	Uint8	*pPixel = scanLine(dst, y, x);
 	int	iX, iY;
@@ -129,7 +129,7 @@ static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int
 
 // 双二次近似
 #ifdef _MSC_VER
-static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
+void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
 {
 	Uint8	*pPixel = scanLine(dst, y, x);
 	__m128i iXY;
@@ -262,7 +262,7 @@ static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst
 	}
 }
 #else
-static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
+void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
 {
 	Uint8	*pPixel = scanLine(dst, y, x);
 	int	iX, iY;
