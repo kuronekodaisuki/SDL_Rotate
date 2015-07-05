@@ -10,7 +10,7 @@
 #ifdef	_MSC_VER
 #define __ASM__	_asm
 #else
-#include <arm_neon.h>
+//#include <arm_neon.h>
 #define __ASM__	__asm__ __volatile__
 #endif
 
@@ -24,7 +24,7 @@ inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
         return (Uint8 *)(surface->pixels) + (y * surface->pitch) + (surface->format->BytesPerPixel * x);
 }
 
-#define BILINEAR_24	Nearest24	//BiLinear24
+#define BILINEAR_24	BiLinear24
 static void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
 static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
 static void Nearest24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
@@ -45,15 +45,6 @@ static void Nearest24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int 
 	}
 }
 
-//inline Uint8 *scanLine(SDL_Surface *surface, int y)
-//{
-//	return (Uint8 *)(surface->pixels) + (y * surface->pitch);
-//}
-
-//inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
-//{
-//	return (Uint8 *)(surface->pixels) + (y * surface->pitch) + (surface->format->BytesPerPixel * x);
-//}
 
 bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degree, SDL_Rect *bound)
 {
@@ -281,12 +272,12 @@ static void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst
 	{
 		float	r, g, b, fX, fY;
 		Uint8	*pPixel0, *pPixel1;
-		float32x4_t XY;
-		uint8x8x3_t raster0, raster1;
+		//float32x4_t XY;
+		//uint8x8x3_t raster0, raster1;
 		pPixel0 = scanLine(src, iY, iX);
 		pPixel1 = scanLine(src, iY + 1, iX);
-		raster0 = vld3_u8(pPixel0);
-		raster1 = vld3_u8(pPixel1);
+		//raster0 = vld3_u8(pPixel0);
+		//raster1 = vld3_u8(pPixel1);
 		fX = X - iX;
 		fY = Y - iY;
 	} else {
