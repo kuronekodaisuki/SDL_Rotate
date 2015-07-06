@@ -24,7 +24,7 @@ inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
         return (Uint8 *)(surface->pixels) + (y * surface->pitch) + (surface->format->BytesPerPixel * x);
 }
 
-#define BILINEAR_24	Nearest24	//BiLinear24
+#define BILINEAR_24	BiLinear24
 inline void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
 inline void BiLinear24_SIMD(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
 inline void Nearest24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
@@ -45,7 +45,50 @@ inline void Nearest24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int 
 	}
 }
 
+// ????? NEON?
+void BiLinear24_NEON(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y)
+{
+	int	iX, iY;
+	Uint8	*pPixel = scanLine(dst, y, x);
+	iX = (int)floor(X);
+	iY = (int)floor(Y);
+	if (0 <= iX && iX < src->w - 1 && 0 <= iY && iY < src->h - 1)
+	{
+		float	r, g, b, fX, fY;
+		Uint8	*pPixel0, *pPixel1;
 
+		pPixel0 = scanLine(src, iY, iX);
+		pPixel1 = scanLine(src, iY + 1, iX);
+		fX = X - iX;
+		fY = Y - iY;
+		__asm__ __volatile__ (
+		"vld3.8     {d0[0], d2[0], d4[0]}, [%0]!      \n" // pixel(0, 0)
+		"vld3.8     {d0[4], d2[4], d4[4]}, [%0]!      \n" // pixel(0, 1)
+		"vld3.8     {d1[0], d3[0], d5[0]}, [%1]!      \n" // pixel(1, 0)
+		"vld3.8     {d1[4], d3[4], d5[4]}, [%1]!      \n" // pixel(1, 1)
+		// TODO
+		"subs       %2, %2, #24                  \n"
+		"vmov       d2, d3                       \n" // order d0, d1, d2
+		"vst3.8     {d0, d1, d2}, [%1]!          \n"
+		//"bgt        1b                           \n"
+		 : "+r"(pPixel0),          // %0
+	 		"+r"(pPixel1),          // %1
+			"+r"(pPixel)         // %2
+		 :
+		 : "d0", "d1", "d2", "d3", "memory", "cc"
+		);
+		/*
+		b = (pPixel0[0] * (1 - fX) + pPixel0[3] * fX) * (1 - fY) + (pPixel1[0] * (1 - fX) + pPixel1[3] * fX) * fY;
+		g = (pPixel0[1] * (1 - fX) + pPixel0[4] * fX) * (1 - fY) + (pPixel1[1] * (1 - fX) + pPixel1[4] * fX) * fY;
+		r = (pPixel0[2] * (1 - fX) + pPixel0[5] * fX) * (1 - fY) + (pPixel1[2] * (1 - fX) + pPixel1[5] * fX) * fY;
+		pPixel[0] = (Uint8)b;
+		pPixel[1] = (Uint8)g;
+		pPixel[2] = (Uint8)r;
+		*/
+	} else {
+		pPixel[0] = pPixel[1] = pPixel[2] = 0;
+	}
+}
 bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degree, SDL_Rect *bound)
 {
 	int bitsPerPixel = src->format->BitsPerPixel;
