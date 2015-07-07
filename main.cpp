@@ -22,6 +22,7 @@ uint64_t getTick() {
 }
 
 bool _SDL_Rotate(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degree, SDL_Rect *bound);
+bool _SDL_Rotate_FP(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double angle, SDL_Rect *bound);
 
 int main(int argc, char** argv)
 {
@@ -39,7 +40,7 @@ int main(int argc, char** argv)
 		
 		SDL_LockSurface(src);
 		SDL_LockSurface(dst);
-		_SDL_Rotate(src, dst, src->w / 2, src->h / 2, 5, &bound);
+		_SDL_Rotate_FP(src, dst, src->w / 2, src->h / 2, 5, &bound);
 		SDL_UnlockSurface(src);
 		SDL_UnlockSurface(dst);
 		SDL_BlitSurface(src, &srcRect, screen, &dstRect);
@@ -50,9 +51,9 @@ int main(int argc, char** argv)
 		uint64_t start = getTick();
 		for (int angle = 0; angle <= 100; angle++)
 		{
-			_SDL_Rotate(src, dst, src->w / 2, src->h / 2, angle, &bound);
-	//		SDL_BlitSurface(dst, &srcRect, screen, &dstRect);
-	//		SDL_Flip(screen);
+			_SDL_Rotate_FP(src, dst, src->w / 2, src->h / 2, angle, &bound);
+			SDL_BlitSurface(dst, &srcRect, screen, &dstRect);
+			SDL_Flip(screen);
 		}
 		uint64_t end = getTick();
 		//printf("%d", start / 1000);

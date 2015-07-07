@@ -14,15 +14,81 @@
 #define __ASM__	__asm__ __volatile__
 #endif
 
-inline Uint8 *scanLine(SDL_Surface *surface, int y)
-{
-        return (Uint8 *)(surface->pixels) + (y * surface->pitch);
-}
+#define FIXED_POINT_t	int32_t // 24bit + 8 bit
+
 
 inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
 {
-        return (Uint8 *)(surface->pixels) + (y * surface->pitch) + (surface->format->BytesPerPixel * x);
+	return (Uint8 *)(surface->pixels) + (y * surface->pitch) + (surface->format->BytesPerPixel * x);
 }
+
+// ?????
+inline void BiLinear24_FP(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_Surface *dst, int x, int y)
+{
+	Uint8	*pPixel = scanLine(dst, y, x);
+	int	iX, iY;
+	iX = X >> 8;
+	iY = Y >> 8;;
+	if (0 <= iX && iX < src->w - 1 && 0 <= iY && iY < src->h - 1)
+	{
+		Uint32	r, g, b, fX, fY;
+		Uint8	*pPixel0, *pPixel1;
+
+		pPixel0 = scanLine(src, iY, iX);
+		pPixel1 = scanLine(src, iY + 1, iX);
+		// fraction part
+		fX = X & 0xFF;	
+		fY = Y & 0xFF;
+		b = (pPixel0[0] * (0x100 - fX) + pPixel0[3] * fX) * (0x100 - fY) + (pPixel1[0] * (0x100 - fX) + pPixel1[3] * fX) * fY;
+		g = (pPixel0[1] * (0x100 - fX) + pPixel0[4] * fX) * (0x100 - fY) + (pPixel1[1] * (0x100 - fX) + pPixel1[4] * fX) * fY;
+		r = (pPixel0[2] * (0x100 - fX) + pPixel0[5] * fX) * (0x100 - fY) + (pPixel1[2] * (0x100 - fX) + pPixel1[5] * fX) * fY;
+		// 
+		pPixel[0] = (Uint8)(b >> 16);
+		pPixel[1] = (Uint8)(g >> 16);
+		pPixel[2] = (Uint8)(r >> 16);
+	} else {
+		pPixel[0] = pPixel[1] = pPixel[2] = 0;
+	}
+}
+
+bool _SDL_Rotate_FP(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double degree, SDL_Rect *bound)
+{
+	int bitsPerPixel = src->format->BitsPerPixel;
+	double radian = M_PI / 180 * degree;
+	float c = (float)cos(radian);
+	float s = (float)sin(radian);
+
+	FIXED_POINT_t X = (FIXED_POINT_t)(cx + s * (cy - bound->y) - c * (cx - bound->x)) * 256;
+	FIXED_POINT_t Y = (FIXED_POINT_t)(cy - c * (cy - bound->y) - s * (cx - bound->x)) * 256;
+	FIXED_POINT_t C = (FIXED_POINT_t)(c * 256);
+	FIXED_POINT_t S = (FIXED_POINT_t)(s * 256);
+
+	if (bitsPerPixel != dst->format->BitsPerPixel)
+	{
+		return false;
+	}
+	switch (bitsPerPixel)
+	{
+	case 24:
+		for (int y = bound->y; y < bound->h + bound->y; y++)
+		{
+			FIXED_POINT_t Xx = X;
+			FIXED_POINT_t Yx = Y;
+			for (int x = bound->x; x < bound->w + bound->x; x++)
+			{
+				BiLinear24_FP(src, Xx, Yx, dst, x, y);
+				Xx += C;
+				Yx += S;
+			}
+			X -= S;
+			Y += C;
+		}
+		return true;
+	}
+
+	return false;
+}
+
 
 #define BILINEAR_24	BiLinear24
 inline void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
@@ -62,10 +128,10 @@ void BiLinear24_NEON(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x
 		fX = X - iX;
 		fY = Y - iY;
 		__asm__ __volatile__ (
-		"vld3.8     {d0[0], d2[0], d4[0]}, [%0]!      \n" // pixel(0, 0)
-		"vld3.8     {d0[4], d2[4], d4[4]}, [%0]!      \n" // pixel(0, 1)
-		"vld3.8     {d1[0], d3[0], d5[0]}, [%1]!      \n" // pixel(1, 0)
-		"vld3.8     {d1[4], d3[4], d5[4]}, [%1]!      \n" // pixel(1, 1)
+//		"vld3.8     {d0[0], d2[0], d4[0]}, [%0]!      \n" // pixel(0, 0)
+//		"vld3.8     {d0[4], d2[4], d4[4]}, [%0]!      \n" // pixel(0, 1)
+//		"vld3.8     {d1[0], d3[0], d5[0]}, [%1]!      \n" // pixel(1, 0)
+//		"vld3.8     {d1[4], d3[4], d5[4]}, [%1]!      \n" // pixel(1, 1)
 		// TODO
 		"subs       %2, %2, #24                  \n"
 		"vmov       d2, d3                       \n" // order d0, d1, d2
