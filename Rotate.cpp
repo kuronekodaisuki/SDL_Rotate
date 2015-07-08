@@ -21,7 +21,43 @@ inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
 	return (Uint8 *)(surface->pixels) + (y * surface->pitch) + (surface->format->BytesPerPixel * x);
 }
 
-// ?????
+// Bi Linear interpolation by Fixed Point
+inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_Surface *dst, int x, int y)
+{
+        Uint8   *pPixel = scanLine(dst, y, x);
+        int     iX, iY;
+        iX = X >> 8;
+        iY = Y >> 8;;
+        if (0 <= iX && iX < src->w - 1 && 0 <= iY && iY < src->h - 1)
+        {
+                Uint32  r, g, b, fX, fY;
+                Uint8   *pPixel0, *pPixel1;
+
+                pPixel0 = scanLine(src, iY, iX);
+                pPixel1 = scanLine(src, iY + 1, iX);
+                // fraction part
+                fX = X & 0xFF;
+                fY = Y & 0xFF;
+		asm volatile (
+		"vld3.8 {d0[], d2[], d4[]}, [%0] \n"
+		"vld3.8 {d1[], d3[], d5[]}, [%1] \n"
+		: "+r" (pPixel0),
+		  "+r" (pPixel1)
+		);
+                b = (pPixel0[0] * (0x100 - fX) + pPixel0[3] * fX) * (0x100 - fY) + (pPixel1[0] * (0x100 - fX) + pPixel1[3] * fX) * fY;
+                g = (pPixel0[1] * (0x100 - fX) + pPixel0[4] * fX) * (0x100 - fY) + (pPixel1[1] * (0x100 - fX) + pPixel1[4] * fX) * fY;
+                r = (pPixel0[2] * (0x100 - fX) + pPixel0[5] * fX) * (0x100 - fY) + (pPixel1[2] * (0x100 - fX) + pPixel1[5] * fX) * fY;
+                // 
+                pPixel[0] = (Uint8)(b >> 16);
+                pPixel[1] = (Uint8)(g >> 16);
+                pPixel[2] = (Uint8)(r >> 16);
+        } else {
+                pPixel[0] = pPixel[1] = pPixel[2] = 0;
+        }
+}
+
+
+// Bi Linear interpolation by Fixed Point
 inline void BiLinear24_FP(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_Surface *dst, int x, int y)
 {
 	Uint8	*pPixel = scanLine(dst, y, x);
@@ -76,7 +112,7 @@ bool _SDL_Rotate_FP(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double d
 			FIXED_POINT_t Yx = Y;
 			for (int x = bound->x; x < bound->w + bound->x; x++)
 			{
-				BiLinear24_FP(src, Xx, Yx, dst, x, y);
+				BiLinear24_FP_NEON(src, Xx, Yx, dst, x, y);
 				Xx += C;
 				Yx += S;
 			}
@@ -128,10 +164,10 @@ void BiLinear24_NEON(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x
 		fX = X - iX;
 		fY = Y - iY;
 		__asm__ __volatile__ (
-//		"vld3.8     {d0[0], d2[0], d4[0]}, [%0]!      \n" // pixel(0, 0)
-//		"vld3.8     {d0[4], d2[4], d4[4]}, [%0]!      \n" // pixel(0, 1)
-//		"vld3.8     {d1[0], d3[0], d5[0]}, [%1]!      \n" // pixel(1, 0)
-//		"vld3.8     {d1[4], d3[4], d5[4]}, [%1]!      \n" // pixel(1, 1)
+		"vld3.8     {d0[], d2[], d4[]}, [%0]!      \n" // pixel(0, 0)
+		//"vld3.8     {d0[4], d2[4], d4[4]}, [%0]!      \n" // pixel(0, 1)
+		"vld3.8     {d1[], d3[], d5[]}, [%1]!      \n" // pixel(1, 0)
+		//"vld3.8     {d1[4], d3[4], d5[4]}, [%1]!      \n" // pixel(1, 1)
 		// TODO
 		"subs       %2, %2, #24                  \n"
 		"vmov       d2, d3                       \n" // order d0, d1, d2
