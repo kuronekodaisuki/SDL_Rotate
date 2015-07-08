@@ -58,8 +58,8 @@ bool _SDL_Rotate_FP(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double d
 	float c = (float)cos(radian);
 	float s = (float)sin(radian);
 
-	FIXED_POINT_t X = (FIXED_POINT_t)(cx + s * (cy - bound->y) - c * (cx - bound->x)) * 256;
-	FIXED_POINT_t Y = (FIXED_POINT_t)(cy - c * (cy - bound->y) - s * (cx - bound->x)) * 256;
+	FIXED_POINT_t X = (FIXED_POINT_t)((cx + s * (cy - bound->y) - c * (cx - bound->x)) * 256);
+	FIXED_POINT_t Y = (FIXED_POINT_t)((cy - c * (cy - bound->y) - s * (cx - bound->x)) * 256);
 	FIXED_POINT_t C = (FIXED_POINT_t)(c * 256);
 	FIXED_POINT_t S = (FIXED_POINT_t)(s * 256);
 
