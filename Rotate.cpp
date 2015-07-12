@@ -9,7 +9,7 @@
 #ifdef	_MSC_VER
 #define __ASM__	_asm
 #else
-//#include <arm_neon.h>
+#include <arm_neon.h>
 #define __ASM__	__asm__ __volatile__
 #endif
 
@@ -24,7 +24,7 @@ inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
 // Bi Linear interpolation by Fixed Point
 inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_Surface *dst, int x, int y)
 {
-        Uint8   *pPixel = scanLine(dst, y, x);
+	Uint8   *pPixel = scanLine(dst, y, x);
         int     iX, iY;
         iX = X >> 8;
         iY = Y >> 8;;
@@ -32,7 +32,7 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
         {
                 Uint32  r, g, b, fX, fY;
                 Uint8   *pPixel0, *pPixel1;
-
+		uint32x4x3_t pixels;
                 pPixel0 = scanLine(src, iY, iX);
                 pPixel1 = scanLine(src, iY + 1, iX);
                 // fraction part
@@ -41,6 +41,9 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
 		asm volatile (
 		"vld3.8 {d0[], d2[], d4[]}, [%0] \n"
 		"vld3.8 {d1[], d3[], d5[]}, [%1] \n"
+		"vmul.i32 q0, q0, q3 \n"
+		"vmul.i32 q1, q1, q3 \n"
+		"vmul.i32 q2, q2, q3 \n"
 		: "+r" (pPixel0),
 		  "+r" (pPixel1)
 		);

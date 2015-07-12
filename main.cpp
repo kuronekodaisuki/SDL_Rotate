@@ -49,11 +49,11 @@ int main(int argc, char** argv)
 		SDL_SaveBMP(dst, "skewed.bmp");
 		
 		uint64_t start = getTick();
-		for (int angle = 0; angle <= 100; angle++)
+		for (int angle = -100; angle < 0; angle++)
 		{
 			_SDL_Rotate_FP(src, dst, src->w / 2, src->h / 2, angle, &bound);
-		//	SDL_BlitSurface(dst, &srcRect, screen, &dstRect);
-		//	SDL_Flip(screen);
+//			SDL_BlitSurface(dst, &srcRect, screen, &dstRect);
+//			SDL_Flip(screen);
 		}
 		uint64_t end = getTick();
 		//printf("%d", start / 1000);
