@@ -13,7 +13,7 @@ uint64_t getTick() {
     {
 	theTick  = ts.tv_usec;
     	theTick += ts.tv_sec * 1000000;
-    	printf("%d sec %d microsec \n", ts.tv_sec, ts.tv_usec);
+    	printf("%ld sec %ld microsec \n", ts.tv_sec, ts.tv_usec);
 	return theTick;
     } else {
 	printf("error");
@@ -56,8 +56,7 @@ int main(int argc, char** argv)
 //			SDL_Flip(screen);
 		}
 		uint64_t end = getTick();
-		//printf("%d", start / 1000);
-		printf("%ld micro sec\n", end- start);
+		printf("%lld micro sec\n", end- start);
 		SDL_FreeSurface(src);
 	}
 	SDL_Quit();
