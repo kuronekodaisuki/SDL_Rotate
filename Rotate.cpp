@@ -48,6 +48,11 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
 		"vmul.i32 q1, q1, q4 \n"
 		"vmul.i32 q2, q2, q4 \n"
 		"vpadd.i32 d0, d0, d0 \n"
+		"vpadd.i32 d1, d1, d1 \n"
+		"vpadd.i32 d2, d2, d2 \n"
+		"vpadd.i32 d3, d3, d3 \n"
+		"vpadd.i32 d4, d4, d4 \n"
+		"vpadd.i32 d5, d5, d5 \n"
 		: "+r" (pPixel0),
 		  "+r" (pPixel1)
 		);
