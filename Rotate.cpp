@@ -26,7 +26,7 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
 {
 	Uint8   *pPixel = scanLine(dst, y, x);
         int     iX, iY;
-	const Uint64 index = 0x0010101001101010;
+	//const Uint64 index = 0x0010101001101010;
 	// Integer parts
         iX = X >> 8;
         iY = Y >> 8;
@@ -35,7 +35,6 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
         {
                 Uint32  r, g, b, fX, fY;
                 Uint8   *pPixel0, *pPixel1;
-		uint32x4x3_t pixels;
                 pPixel0 = scanLine(src, iY, iX);
                 pPixel1 = scanLine(src, iY + 1, iX);
                 // Fraction parts
@@ -44,8 +43,13 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
 		asm volatile (
 		"vld3.8 {d0[], d2[], d4[]}, [%0] \n"
 		"vld3.8 {d1[], d3[], d5[]}, [%1] \n"
-//		"vldr.64 d10, index \n"
+		"vldr.u64 d10, =0x00101010 \n"
 		"vtbl.8 d0, {d0}, d10 \n"
+		"vtbl.8 d1, {d1}, d10 \n"
+		"vtbl.8 d2, {d2}, d10 \n"
+		"vtbl.8 d3, {d3}, d10 \n"
+		"vtbl.8 d4, {d4}, d10 \n"
+		"vtbl.8 d5, {d5}, d10 \n"
 		"vmul.i32 q0, q0, q3 \n"
 		"vmul.i32 q1, q1, q3 \n"
 		"vmul.i32 q2, q2, q3 \n"
@@ -54,12 +58,14 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
 		"vmul.i32 q2, q2, q4 \n"
 		"vpadd.s32 d0, d0, d1 \n"
 		"vpaddl.s32 d0, d0 \n"
-		"vpadd.s32 d2, d2, d3 \n"
+		"vpadd.s32 d1, d2, d3 \n"
+		"vpaddl.s32 d1, d1 \n"
+		"vpadd.s32 d2, d4, d5 \n"
 		"vpaddl.s32 d2, d2 \n"
-		"vpadd.s32 d4, d4, d5 \n"
-		"vpaddl.s32 d4, d4 \n"
+		"vst3.8 {d0[2], d1[2], d2[2]}, [%2] \n"
 		: "=r" (pPixel0),
-		  "=r" (pPixel1)
+		  "=r" (pPixel1),
+		  "=r" (pPixel)
 		);
                 b = (pPixel0[0] * (0x100 - fX) + pPixel0[3] * fX) * (0x100 - fY) + (pPixel1[0] * (0x100 - fX) + pPixel1[3] * fX) * fY;
                 g = (pPixel0[1] * (0x100 - fX) + pPixel0[4] * fX) * (0x100 - fY) + (pPixel1[1] * (0x100 - fX) + pPixel1[4] * fX) * fY;
