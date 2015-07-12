@@ -1,17 +1,9 @@
 //
 
 #include <SDL/SDL.h>
-//#include <emmintrin.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
-
-
-#ifdef	_MSC_VER
-#define __ASM__	_asm
-#else
 #include <arm_neon.h>
-#define __ASM__	__asm__ __volatile__
-#endif
 
 #define FIXED_POINT_t	int32_t // 24bit + 8 bit
 
@@ -26,7 +18,7 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
 {
 	Uint8   *pPixel = scanLine(dst, y, x);
         int     iX, iY;
-	//const Uint64 index = 0x0010101001101010;
+	const Uint64 index = 0x0010101001101010;
 	// Integer parts
         iX = X >> 8;
         iY = Y >> 8;
@@ -41,9 +33,9 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
                 fX = X & 0xFF;
                 fY = Y & 0xFF;
 		asm volatile (
-		"vld3.8 {d0[], d2[], d4[]}, [%0] \n"
-		"vld3.8 {d1[], d3[], d5[]}, [%1] \n"
-		"vldr.u64 d10, =0x00101010 \n"
+		"vld3.8 {d0[], d2[], d4[]}, [%1] \n"
+		"vld3.8 {d1[], d3[], d5[]}, [%2] \n"
+		"vld1.64 d10, [%3] \n"
 		"vtbl.8 d0, {d0}, d10 \n"
 		"vtbl.8 d1, {d1}, d10 \n"
 		"vtbl.8 d2, {d2}, d10 \n"
@@ -62,10 +54,11 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
 		"vpaddl.s32 d1, d1 \n"
 		"vpadd.s32 d2, d4, d5 \n"
 		"vpaddl.s32 d2, d2 \n"
-		"vst3.8 {d0[2], d1[2], d2[2]}, [%2] \n"
-		: "=r" (pPixel0),
-		  "=r" (pPixel1),
-		  "=r" (pPixel)
+		"vst3.8 {d0[2], d1[2], d2[2]}, [%0] \n"
+		: "=r" (pPixel)
+		: "r" (pPixel0),
+		  "r" (pPixel1),
+		  "r" (index)
 		);
                 b = (pPixel0[0] * (0x100 - fX) + pPixel0[3] * fX) * (0x100 - fY) + (pPixel1[0] * (0x100 - fX) + pPixel1[3] * fX) * fY;
                 g = (pPixel0[1] * (0x100 - fX) + pPixel0[4] * fX) * (0x100 - fY) + (pPixel1[1] * (0x100 - fX) + pPixel1[4] * fX) * fY;
