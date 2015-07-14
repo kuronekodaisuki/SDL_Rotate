@@ -32,8 +32,7 @@ void test(Uint8 *pPixel0, Uint8 *pPixel1, Uint32 fX, Uint32 fY, Uint8 *pPixel)
                 "vpaddl.s32 d1, d1 \n\t"
                 "vpadd.s32 d2, d4, d5 \n\t"
                 "vpaddl.s32 d2, d2 \n\t"
-//                "vst3.8 {d0[2], d1[2], d2[2]}, [%0] \n"
-//		"vst3.8 {d0, d1, d2}, [%0] \n\t"
+                "vst3.8 {d0[2], d1[2], d2[2]}, [%0] \n\t"
                 : "=r" (pPixel)
                 : "r" (pPixel0),
                   "r" (pPixel1),
@@ -51,6 +50,7 @@ int main(int argc, char *argv[])
 	Uint32 fX = 0x80;
 	Uint32 fY = 0x00;
 	test(raster0, raster1, fX, fY, result);
+	printf("%d %d %d\n", result[0], result[1], result[2]);
 	return 0;
 }
 
