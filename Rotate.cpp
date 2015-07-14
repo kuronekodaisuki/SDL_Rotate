@@ -18,7 +18,7 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
 {
 	Uint8   *pPixel = scanLine(dst, y, x);
         int     iX, iY;
-	const Uint64 index = 0x0010101001101010;
+	const Uint64 index = 0x1010100110101000;
 	// Integer parts
         iX = X >> 8;
         iY = Y >> 8;
@@ -32,44 +32,42 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
                 // Fraction parts
                 fX = X & 0xFF;
                 fY = Y & 0xFF;
-/*
-		asm volatile (
-		"vld3.8 {d0[], d2[], d4[]}, [%1] \n"
-		"vld3.8 {d1[], d3[], d5[]}, [%2] \n"
-		"vld1.64 d10, [%3] \n"
-		"vtbl.8 d0, {d0}, d10 \n"
-		"vtbl.8 d1, {d1}, d10 \n"
-		"vtbl.8 d2, {d2}, d10 \n"
-		"vtbl.8 d3, {d3}, d10 \n"
-		"vtbl.8 d4, {d4}, d10 \n"
-		"vtbl.8 d5, {d5}, d10 \n"
-		"vmul.i32 q0, q0, q3 \n"
-		"vmul.i32 q1, q1, q3 \n"
-		"vmul.i32 q2, q2, q3 \n"
-		"vmul.i32 q0, q0, q4 \n"
-		"vmul.i32 q1, q1, q4 \n"
-		"vmul.i32 q2, q2, q4 \n"
-		"vpadd.s32 d0, d0, d1 \n"
-		"vpaddl.s32 d0, d0 \n"
-		"vpadd.s32 d1, d2, d3 \n"
-		"vpaddl.s32 d1, d1 \n"
-		"vpadd.s32 d2, d4, d5 \n"
-		"vpaddl.s32 d2, d2 \n"
-		"vst3.8 {d0[2], d1[2], d2[2]}, [%0] \n"
-		: "=r" (pPixel)
-		: "r" (pPixel0),
-		  "r" (pPixel1),
-		  "r" (index)
-		);
-*/
-                b = (pPixel0[0] * (0x100 - fX) + pPixel0[3] * fX) * (0x100 - fY) + (pPixel1[0] * (0x100 - fX) + pPixel1[3] * fX) * fY;
-                g = (pPixel0[1] * (0x100 - fX) + pPixel0[4] * fX) * (0x100 - fY) + (pPixel1[1] * (0x100 - fX) + pPixel1[4] * fX) * fY;
-                r = (pPixel0[2] * (0x100 - fX) + pPixel0[5] * fX) * (0x100 - fY) + (pPixel1[2] * (0x100 - fX) + pPixel1[5] * fX) * fY;
-                // 
-                pPixel[0] = (Uint8)(b >> 16);
-                pPixel[1] = (Uint8)(g >> 16);
-                pPixel[2] = (Uint8)(r >> 16);
-        } else {
+	        uint32x4_t coeffX = {0x100 - fX, 0x100 - fX, fX, fX};
+        	uint32x4_t coeffY = {0x100 - fY, fY, 0x100 - fY, fY};
+		// assembler
+                asm volatile (
+                "vld3.8 {d0, d2, d4}, [%1] \n\t"
+                "vld3.8 {d1, d3, d5}, [%2] \n\t"
+                "vld1.64 d10, [%3] \n\t"
+                "vtbl.8 d0, {d0}, d10 \n\t"
+                "vtbl.8 d1, {d1}, d10 \n\t"
+                "vtbl.8 d2, {d2}, d10 \n\t"
+                "vtbl.8 d3, {d3}, d10 \n\t"
+                "vtbl.8 d4, {d4}, d10 \n\t"
+                "vtbl.8 d5, {d5}, d10 \n\t"
+                "vld2.32 {d6, d7}, [%4] \n\t"
+                "vld2.32 {d8, d9}, [%5] \n\t"
+                "vmul.i32 q0, q0, q3 \n\t"
+                "vmul.i32 q1, q1, q3 \n\t"
+                "vmul.i32 q2, q2, q3 \n\t"
+                "vmul.i32 q0, q0, q4 \n\t"
+                "vmul.i32 q1, q1, q4 \n\t"
+                "vmul.i32 q2, q2, q4 \n\t"
+                "vpadd.s32 d0, d0, d1 \n\t"
+                "vpaddl.s32 d0, d0 \n\t"
+                "vpadd.s32 d1, d2, d3 \n\t"
+                "vpaddl.s32 d1, d1 \n\t"
+                "vpadd.s32 d2, d4, d5 \n\t"
+                "vpaddl.s32 d2, d2 \n\t"
+                "vst3.8 {d0[2], d1[2], d2[2]}, [%0] \n\t"
+                : "=r" (pPixel)
+                : "r" (pPixel0),
+                  "r" (pPixel1),
+                  "r" (&index),
+                  "r" (&coeffX),
+                  "r" (&coeffY)
+                );
+	} else {
                 pPixel[0] = pPixel[1] = pPixel[2] = 0;
         }
 }

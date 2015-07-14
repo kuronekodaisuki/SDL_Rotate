@@ -40,6 +40,7 @@ void test(Uint8 *pPixel0, Uint8 *pPixel1, Uint32 fX, Uint32 fY, Uint8 *pPixel)
 		  "r" (&coeffX),
 		  "r" (&coeffY)
                 );
+	printf("%d %d %d \n", pPixel[0], pPixel[1], pPixel[2]);
 }
 
 int main(int argc, char *argv[])
@@ -50,7 +51,10 @@ int main(int argc, char *argv[])
 	Uint32 fX = 0x80;
 	Uint32 fY = 0x00;
 	test(raster0, raster1, fX, fY, result);
-	printf("%d %d %d\n", result[0], result[1], result[2]);
+	printf("%d %d %d, %d %d %d, %d %d %d\n", 
+		result[0], result[1], result[2],
+		result[3], result[4], result[5],
+		result[6], result[7], result[8] );
 	return 0;
 }
 
