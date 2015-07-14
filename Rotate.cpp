@@ -32,6 +32,7 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
                 // Fraction parts
                 fX = X & 0xFF;
                 fY = Y & 0xFF;
+/*
 		asm volatile (
 		"vld3.8 {d0[], d2[], d4[]}, [%1] \n"
 		"vld3.8 {d1[], d3[], d5[]}, [%2] \n"
@@ -60,6 +61,7 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
 		  "r" (pPixel1),
 		  "r" (index)
 		);
+*/
                 b = (pPixel0[0] * (0x100 - fX) + pPixel0[3] * fX) * (0x100 - fY) + (pPixel1[0] * (0x100 - fX) + pPixel1[3] * fX) * fY;
                 g = (pPixel0[1] * (0x100 - fX) + pPixel0[4] * fX) * (0x100 - fY) + (pPixel1[1] * (0x100 - fX) + pPixel1[4] * fX) * fY;
                 r = (pPixel0[2] * (0x100 - fX) + pPixel0[5] * fX) * (0x100 - fY) + (pPixel1[2] * (0x100 - fX) + pPixel1[5] * fX) * fY;
