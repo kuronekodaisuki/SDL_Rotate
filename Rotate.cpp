@@ -36,17 +36,17 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
         	uint32x4_t coeffY = {0x100 - fY, fY, 0x100 - fY, fY};
 		// assembler
                 asm volatile (
-                "vld3.8 {d0, d2, d4}, [%1] \n\t"
-                "vld3.8 {d1, d3, d5}, [%2] \n\t"
-                "vld1.64 d10, [%3] \n\t"
+                "vld3.8 {d0, d2, d4}, [%1] \n\t"	// pPixel0 - first raster
+                "vld3.8 {d1, d3, d5}, [%2] \n\t"	// pPixel1 - next raster
+                "vld1.64 d10, [%3] \n\t"		// index of vtbl
                 "vtbl.8 d0, {d0}, d10 \n\t"
                 "vtbl.8 d1, {d1}, d10 \n\t"
                 "vtbl.8 d2, {d2}, d10 \n\t"
                 "vtbl.8 d3, {d3}, d10 \n\t"
                 "vtbl.8 d4, {d4}, d10 \n\t"
                 "vtbl.8 d5, {d5}, d10 \n\t"
-                "vld2.32 {d6, d7}, [%4] \n\t"
-                "vld2.32 {d8, d9}, [%5] \n\t"
+                "vld2.32 {d6, d7}, [%4] \n\t"		// coeffX
+                "vld2.32 {d8, d9}, [%5] \n\t"		// coeffY
                 "vmul.i32 q0, q0, q3 \n\t"
                 "vmul.i32 q1, q1, q3 \n\t"
                 "vmul.i32 q2, q2, q3 \n\t"
@@ -59,13 +59,13 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
                 "vpaddl.s32 d1, d1 \n\t"
                 "vpadd.s32 d2, d4, d5 \n\t"
                 "vpaddl.s32 d2, d2 \n\t"
-                "vst3.8 {d0[2], d1[2], d2[2]}, [%0] \n\t"
-                : "+r" (pPixel)
-                : "r" (pPixel0),
-                  "r" (pPixel1),
-                  "r" (&index),
-                  "r" (&coeffX),
-                  "r" (&coeffY)
+                "vst3.8 {d0[2], d1[2], d2[2]}, [%0] \n"	// pPixel - result of interpolation	
+                : "+r" (pPixel)  // %0
+                : "r" (pPixel0), // %1
+                  "r" (pPixel1), // %2
+                  "r" (&index),  // %3
+                  "r" (&coeffX), // %4
+                  "r" (&coeffY)  // %5
                 );
 	} else {
                 pPixel[0] = pPixel[1] = pPixel[2] = 0;
