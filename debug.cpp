@@ -8,7 +8,6 @@ void test(uint8_t *pPixel0, uint8_t *pPixel1, uint32_t fX, uint32_t fY, uint8_t 
         const Uint64 index = 0x1010100110101000;
 	uint32x4_t coeffX = {0x100 - fX, 0x100 - fX, fX, fX};
 	uint32x4_t coeffY = {0x100 - fY, fY, 0x100 - fY, fY};
-	uint8_t buffer[24];
                 asm volatile (
                 "vld3.8 {d0, d2, d4}, [%1] \n\t"
                 "vld3.8 {d1, d3, d5}, [%2] \n\t"
@@ -46,10 +45,10 @@ void test(uint8_t *pPixel0, uint8_t *pPixel1, uint32_t fX, uint32_t fY, uint8_t 
 
 int main(int argc, char *argv[])
 {
-	Uint8 raster0[24] = {255, 255, 255, 3, 4, 5};
-	Uint8 raster1[24] = {0, 0, 128, 9, 10, 11};
+	Uint8 raster0[24] = {255, 255, 255, 0, 0, 255}; // White, Red
+	Uint8 raster1[24] = {255, 255, 255, 0, 0, 255};	// White, Red
 	Uint8 result[24] = {0};
-	Uint32 fX = 0x80;
+	Uint32 fX = 0x80;	
 	Uint32 fY = 0x00;
 	test(raster0, raster1, fX, fY, result);
 	printf("%d %d %d, %d %d %d, %d %d %d\n", 
