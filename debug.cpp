@@ -3,11 +3,12 @@
 #include <SDL/SDL.h>
 #include <arm_neon.h>
 
-void test(Uint8 *pPixel0, Uint8 *pPixel1, Uint32 fX, Uint32 fY, Uint8 *pPixel)
+void test(uint8_t *pPixel0, uint8_t *pPixel1, uint32_t fX, uint32_t fY, uint8_t *pPixel)
 {
         const Uint64 index = 0x1010100110101000;
 	uint32x4_t coeffX = {0x100 - fX, 0x100 - fX, fX, fX};
 	uint32x4_t coeffY = {0x100 - fY, fY, 0x100 - fY, fY};
+	uint8_t buffer[24];
                 asm volatile (
                 "vld3.8 {d0, d2, d4}, [%1] \n\t"
                 "vld3.8 {d1, d3, d5}, [%2] \n\t"
@@ -33,7 +34,7 @@ void test(Uint8 *pPixel0, Uint8 *pPixel1, Uint32 fX, Uint32 fY, Uint8 *pPixel)
                 "vpadd.s32 d2, d4, d5 \n\t"
                 "vpaddl.s32 d2, d2 \n\t"
                 "vst3.8 {d0[2], d1[2], d2[2]}, [%0] \n\t"
-                : "=r" (pPixel)
+                : "+r" (pPixel)
                 : "r" (pPixel0),
                   "r" (pPixel1),
                   "r" (&index),

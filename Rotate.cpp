@@ -60,7 +60,7 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
                 "vpadd.s32 d2, d4, d5 \n\t"
                 "vpaddl.s32 d2, d2 \n\t"
                 "vst3.8 {d0[2], d1[2], d2[2]}, [%0] \n\t"
-                : "=r" (pPixel)
+                : "+r" (pPixel)
                 : "r" (pPixel0),
                   "r" (pPixel1),
                   "r" (&index),
