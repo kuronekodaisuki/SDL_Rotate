@@ -3,7 +3,7 @@
 #include <SDL/SDL.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include <arm_neon.h>
+//#include <arm_neon.h>
 
 #define FIXED_POINT_t	int32_t // 24bit + 8 bit
 
@@ -32,8 +32,10 @@ void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_
                 // Fraction parts
                 fX = X & 0xFF;
                 fY = Y & 0xFF;
-	        uint32x4_t coeffX = {0x100 - fX, 0x100 - fX, fX, fX};
-        	uint32x4_t coeffY = {0x100 - fY, fY, 0x100 - fY, fY};
+	        //uint32x4_t coeffX = {0x100 - fX, 0x100 - fX, fX, fX};
+        	//uint32x4_t coeffY = {0x100 - fY, fY, 0x100 - fY, fY};
+		uint32_t coeffX[4] = {0x100 - fX, 0x100 - fX, fX, fX};
+		uint32_t coeffY[4] = {0x100 - fY, fY, 0x100 - fY, fY};
 		// assembler
                 __asm__ __volatile__ (
                 "vld3.8 {d0, d2, d4}, [%1] \n\t"	// pPixel0 - first raster
