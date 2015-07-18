@@ -14,7 +14,7 @@ inline Uint8 *scanLine(SDL_Surface *surface, int y, int x)
 }
 
 // Bi Linear interpolation by Fixed Point
-inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_Surface *dst, int x, int y)
+void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_Surface *dst, int x, int y)
 {
 	Uint8   *pPixel = scanLine(dst, y, x);
         int     iX, iY;
@@ -35,7 +35,7 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
 	        uint32x4_t coeffX = {0x100 - fX, 0x100 - fX, fX, fX};
         	uint32x4_t coeffY = {0x100 - fY, fY, 0x100 - fY, fY};
 		// assembler
-                asm volatile (
+                __asm__ __volatile__ (
                 "vld3.8 {d0, d2, d4}, [%1] \n\t"	// pPixel0 - first raster
                 "vld3.8 {d1, d3, d5}, [%2] \n\t"	// pPixel1 - next raster
                 "vld1.64 d10, [%3] \n\t"		// index of vtbl
@@ -72,7 +72,6 @@ inline void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t 
                 pPixel[0] = pPixel[1] = pPixel[2] = 0;
         }
 }
-
 
 // Bi Linear interpolation by Fixed Point
 inline void BiLinear24_FP(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_Surface *dst, int x, int y)
@@ -130,6 +129,7 @@ bool _SDL_Rotate_FP(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double d
 			for (int x = bound->x; x < bound->w + bound->x; x++)
 			{
 				BiLinear24_FP_NEON(src, Xx, Yx, dst, x, y);
+				//BiLinear24_FP(src, Xx, Yx, dst, x, y);
 				Xx += C;
 				Yx += S;
 			}
@@ -141,7 +141,6 @@ bool _SDL_Rotate_FP(SDL_Surface *src, SDL_Surface *dst, int cx, int cy, double d
 
 	return false;
 }
-
 
 #define BILINEAR_24	BiLinear24
 inline void BiLinear24(SDL_Surface *src, float X, float Y, SDL_Surface *dst, int x, int y);
