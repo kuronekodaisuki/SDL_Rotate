@@ -74,7 +74,7 @@ void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_
 }
 
 // Bi Linear interpolation by Fixed Point
-inline void BiLinear24_FP(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_Surface *dst, int x, int y)
+void BiLinear24_FP(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_Surface *dst, int x, int y)
 {
 	Uint8	*pPixel = scanLine(dst, y, x);
 	int	iX, iY;
