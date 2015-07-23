@@ -68,7 +68,7 @@ void BiLinear24_FP_NEON(SDL_Surface *src, FIXED_POINT_t X, FIXED_POINT_t Y, SDL_
                   "r" (&index),  // %3
                   "r" (&coeffX), // %4
                   "r" (&coeffY)  // %5
-		: "q0", "q1", "q2", "q3", "q4", "d10"	// working register
+		: "memory", "q0", "q1", "q2", "q3", "q4", "d10"	// working register
                 );
 	} else {
                 pPixel[0] = pPixel[1] = pPixel[2] = 0;
