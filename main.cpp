@@ -45,21 +45,19 @@ int main(int argc, char** argv)
 		SDL_UnlockSurface(dst);
 		SDL_BlitSurface(src, &srcRect, screen, &dstRect);
 		SDL_Flip(screen);
-//		SDL_SaveBMP(src, "src.bmp");
-//		SDL_SaveBMP(dst, "skewed.bmp");
 		
 		uint64_t start = getTick();
 		for (int angle = -100; angle < 0; angle++)
 		{
 			_SDL_Rotate_FP(src, dst, src->w / 2, src->h / 2, angle, &bound);
-//			SDL_BlitSurface(dst, &srcRect, screen, &dstRect);
-//			SDL_Flip(screen);
+			SDL_BlitSurface(dst, &srcRect, screen, &dstRect);
+			SDL_Flip(screen);
 		}
 		uint64_t end = getTick();
 		printf("%lld micro sec\n", end- start);
 		_SDL_Rotate_FP(src, dst, src->w / 2, src->h / 2, 5, &bound);
-		SDL_BlitSurface(src, &srcRect, screen, &dstRect);
-		SDL_Flip(screen);
+//		SDL_BlitSurface(src, &srcRect, screen, &dstRect);
+//		SDL_Flip(screen);
 		SDL_SaveBMP(dst, "skewed.bmp");
 		SDL_FreeSurface(src);
 	}
