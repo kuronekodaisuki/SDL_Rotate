@@ -11,7 +11,6 @@
 
 static SDL_Surface *screen;
 static SDL_Surface *frame;
-//static uint8_t frame[SIZE_OF_FRAME];
 static int current = 0;
 
 void on_data (omxcam_buffer_t buffer){
