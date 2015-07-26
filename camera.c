@@ -10,22 +10,21 @@
 #define SIZE_OF_FRAME (WIDTH * HEIGHT * 3)
 
 static SDL_Surface *screen;
-static uint8_t frame[SIZE_OF_FRAME];
+static SDL_Surface *frame;
+//static uint8_t frame[SIZE_OF_FRAME];
 static int current = 0;
 
 void on_data (omxcam_buffer_t buffer){
         printf("%d %d ", current, buffer.length);
 
-	memcpy(buffer.data, frame + current, buffer.length);
+	memcpy((frame->pixels) + current, buffer.data, buffer.length);
 	current += buffer.length;
 	if (SIZE_OF_FRAME <= current)
 	{
 		printf("%d ", current);
-		SDL_Surface *image = SDL_CreateRGBSurfaceFrom(buffer.data, WIDTH, HEIGHT, 24, WIDTH * 3, 
-			0x00ff0000, 0x0000ff00, 0x000000ff, 0);
 		SDL_Rect srcRect = {0, 0, WIDTH, HEIGHT};
 		SDL_Rect dstRect = {0, 0};
-		SDL_BlitSurface(image, &srcRect, screen, &dstRect);
+		SDL_BlitSurface(frame, &srcRect, screen, &dstRect);
 		SDL_Flip(screen);
 		current = 0; 
 	}
@@ -35,13 +34,9 @@ int main (){
         int quit = 0;
 	SDL_Init(SDL_INIT_EVERYTHING);
         screen = SDL_SetVideoMode(WIDTH, HEIGHT, 24, SDL_HWSURFACE | SDL_DOUBLEBUF);
-        //SDL_Surface *dst = SDL_CreateRGBSurface(SDL_SWSURFACE, src->w * scale, src->h * scale, src->format->BitsPerPixel,
-        //                src->format->Rmask, src->format->Gmask, src->format->Bmask, 0);
-
-//        SDL_Rect srcRect = {0, 0, dst->w, dst->h};
-//        SDL_Rect dstRect = {0, 0};
-        //_SDL_Zoom_FP(src, dst, scale);
-        //SDL_BlitSurface(dst, &srcRect, screen, &dstRect);
+    	 
+	frame = SDL_CreateRGBSurface(SDL_SWSURFACE, WIDTH, HEIGHT, 24,   
+                        0x00ff0000, 0x0000ff00, 0x000000ff, 0);
         SDL_Flip(screen);
   //The settings of the image capture
   omxcam_still_settings_t settings;
