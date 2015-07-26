@@ -1,8 +1,12 @@
 #include <SDL/SDL.h>
 
 #define _USE_MATH_DEFINES
+#include <unistd.h>
 #include <math.h>
 #include "omxcam.h"
+
+#define WIDTH 640
+#define HEIGHT 480
 
 void on_data (omxcam_buffer_t buffer){
   //buffer: the data
@@ -11,7 +15,7 @@ void on_data (omxcam_buffer_t buffer){
 
 int main (){
         SDL_Init(SDL_INIT_EVERYTHING);
-//        SDL_Surface *screen = SDL_SetVideoMode(src->w * scale, src->h * scale, 24, SDL_HWSURFACE | SDL_DOUBLEBUF);
+        SDL_Surface *screen = SDL_SetVideoMode(WIDTH, HEIGHT, 24, SDL_HWSURFACE | SDL_DOUBLEBUF);
         //SDL_Surface *dst = SDL_CreateRGBSurface(SDL_SWSURFACE, src->w * scale, src->h * scale, src->format->BitsPerPixel,
         //                src->format->Rmask, src->format->Gmask, src->format->Bmask, 0);
 
@@ -19,7 +23,7 @@ int main (){
 //        SDL_Rect dstRect = {0, 0};
         //_SDL_Zoom_FP(src, dst, scale);
         //SDL_BlitSurface(dst, &srcRect, screen, &dstRect);
-        //SDL_Flip(screen);
+        SDL_Flip(screen);
         int quit = 0;
         while (!quit)
         {
@@ -34,6 +38,8 @@ int main (){
   omxcam_still_settings_t settings;
   
   //Initialize the settings with default values (jpeg, 2592x1944)
+  settings.camera.width = WIDTH;
+  settings.camera.height = HEIGHT;
   omxcam_still_init (&settings);
   
   //Set the buffer callback, this is mandatory
